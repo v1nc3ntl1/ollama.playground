@@ -427,3 +427,7 @@ FodyWeavers.xsd
 .msix
 .msm
 .msp
+
+*.csproj.user
+*appsettings.Development.json
+*appsettings.Testing.json
