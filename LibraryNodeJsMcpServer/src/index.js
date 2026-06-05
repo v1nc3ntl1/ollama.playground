@@ -45,7 +45,7 @@ if (process.env.PORT) {
       res.status(404).json({ error: "Session not found" });
       return;
     }
-    await transport.handlePostMessage(req, res);
+    await transport.handlePostMessage(req, res, req.body);
   });
 
   app.listen(process.env.PORT, () =>

@@ -30,6 +30,7 @@ IClientTransport transport = mcpServerUrl is not null
           }
       });
 
+Console.WriteLine($"Connecting to MCP server (type: {transport.GetType().Name})...");
 await using var mcp = await McpClient.CreateAsync(transport);
 
 var mcpTools = await mcp.ListToolsAsync();
