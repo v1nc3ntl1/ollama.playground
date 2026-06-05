@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: library-api   # any name you like
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    branch: main
+    # If your code lives in a sub‑folder, add `repoDir: subfolder`
+    # healthCheckPath: /api/books   # optional

@@ -1,0 +1,142 @@
+openapi: 3.0.3
+info:
+  title: Library API
+  description: Simple library application to view, reserve, and return books.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3010
+
+paths:
+  /api/books:
+    get:
+      summary: Get all books
+      operationId: getAllBooks
+      responses:
+        '200':
+          description: List of all books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+
+  /api/books/{id}:
+    get:
+      summary: Get a book by ID
+      operationId: getBook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /api/books/{id}/reserve:
+    post:
+      summary: Reserve a book
+      operationId: reserveBook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReserveRequest'
+      responses:
+        '200':
+          description: Book reserved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Validation error or already reserved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /api/books/{id}/return:
+    post:
+      summary: Return a reserved book
+      operationId: returnBook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Book not found or not reserved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Clean Code
+        author:
+          type: string
+          example: Robert C. Martin
+        isbn:
+          type: string
+          example: 978-0132350884
+        isReserved:
+          type: boolean
+          example: false
+        reservedBy:
+          type: string
+          nullable: true
+          example: null
+
+    ReserveRequest:
+      type: object
+      required:
+        - reservedBy
+      properties:
+        reservedBy:
+          type: string
+          example: Alice
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Book reserved successfully.
