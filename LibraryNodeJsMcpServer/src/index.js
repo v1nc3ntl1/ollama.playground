@@ -14,6 +14,8 @@ const libraryApiUrl =
   process.env.LIBRARY_API_URL ||
   "http://localhost:5000";
 
+console.log(`Starting Library MCP Server with API URL: ${libraryApiUrl}...`);
+
 function createServer() {
   const server = new Server(
     { name: "library-mcp-server", version: "1.0.0" },
