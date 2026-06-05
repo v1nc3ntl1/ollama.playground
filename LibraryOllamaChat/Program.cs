@@ -4,27 +4,30 @@ using System.Text.Json.Serialization;
 using ModelContextProtocol.Client;
 
 // ── Configuration ──────────────────────────────────────────────────────────
-var ollamaUrl     = Environment.GetEnvironmentVariable("OLLAMA_URL")      ?? "http://localhost:11434";
-var model         = Environment.GetEnvironmentVariable("OLLAMA_MODEL")     ?? "deepseek-r1";
-var libraryApiUrl = Environment.GetEnvironmentVariable("LIBRARY_API_URL")  ?? "http://localhost:5000";
-
-// Resolve LibraryMcpServer path relative to this project's output folder
-var mcpServerProject = Path.GetFullPath(
-    Path.Combine(AppContext.BaseDirectory, "../../../../LibraryMcpServer"));
+var ollamaUrl     = Environment.GetEnvironmentVariable("OLLAMA_URL")       ?? "http://localhost:11434";
+var model         = Environment.GetEnvironmentVariable("OLLAMA_MODEL")      ?? "deepseek-r1";
+var libraryApiUrl = Environment.GetEnvironmentVariable("LIBRARY_API_URL")   ?? "http://localhost:5000";
+var mcpServerUrl  = Environment.GetEnvironmentVariable("MCP_SERVER_URL");   // e.g. https://library-mcp-server.onrender.com/sse
 
 // ── Connect to MCP server via stdio ────────────────────────────────────────
 Console.WriteLine("Starting Library MCP Server...");
 
-var transport = new StdioClientTransport(new StdioClientTransportOptions
-{
-    Name    = "LibraryMcpServer",
-    Command = "dotnet",
-    Arguments = ["run", "--project", mcpServerProject, "--no-build"],
-    EnvironmentVariables = new Dictionary<string, string?>
-    {
-        ["LIBRARY_API_URL"] = libraryApiUrl
-    }
-});
+IClientTransport transport = mcpServerUrl is not null
+    ? new HttpClientTransport(new HttpClientTransportOptions
+      {
+          Endpoint      = new Uri(mcpServerUrl),
+          TransportMode = HttpTransportMode.Sse   // Node.js server uses SSE transport
+      })
+    : new StdioClientTransport(new StdioClientTransportOptions
+      {
+          Name    = "LibraryNodeJsMcpServer",
+          Command = "node",
+          Arguments = [@"C:\projects\ollama.playground\LibraryNodeJsMcpServer\src\index.js"],
+          EnvironmentVariables = new Dictionary<string, string?>
+          {
+              ["LIBRARY_API_URL"] = libraryApiUrl
+          }
+      });
 
 await using var mcp = await McpClient.CreateAsync(transport);
 

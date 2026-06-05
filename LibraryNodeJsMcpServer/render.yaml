@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: library-mcp-server
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    branch: main
+    envVars:
+      - key: LIBRARY_API_URL
+        value: https://ollama-playground.onrender.com   # no /api — paths in axios already include /api/...
