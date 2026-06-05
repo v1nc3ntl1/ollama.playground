@@ -4,9 +4,10 @@ using System.Text.Json.Serialization;
 using ModelContextProtocol.Client;
 
 // ── Configuration ──────────────────────────────────────────────────────────
-var ollamaUrl     = Environment.GetEnvironmentVariable("OLLAMA_URL")       ?? "http://localhost:11434";
-var model         = Environment.GetEnvironmentVariable("OLLAMA_MODEL")      ?? "deepseek-r1";
-var libraryApiUrl = Environment.GetEnvironmentVariable("LIBRARY_API_URL")   ?? "http://localhost:5000";
+var ollamaUrl     = Environment.GetEnvironmentVariable("OLLAMA_URL")       ?? "https://ollama.com";
+var model         = Environment.GetEnvironmentVariable("OLLAMA_MODEL")      ?? "gpt-oss:120b-cloud";
+var libraryApiUrl = Environment.GetEnvironmentVariable("LIBRARY_API_URL")   ?? "http://localhost:5100";
+var apiKey       = Environment.GetEnvironmentVariable("LIBRARY_API_KEY")  ?? "";
 var mcpServerUrl  = Environment.GetEnvironmentVariable("MCP_SERVER_URL");   // e.g. https://library-mcp-server.onrender.com/sse
 
 // ── Connect to MCP server via stdio ────────────────────────────────────────
@@ -88,8 +89,10 @@ while ((line = Console.ReadLine()) is not null)
 
         using var req = new HttpRequestMessage(HttpMethod.Post, $"{ollamaUrl}/api/chat")
         {
-            Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+            Content = new StringContent(requestBody, Encoding.UTF8, "application/json"),
         };
+        if (!string.IsNullOrEmpty(apiKey))
+            req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
 
         using var res = await http.SendAsync(req);
         var rawJson = await res.Content.ReadAsStringAsync();
